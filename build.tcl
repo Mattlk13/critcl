@@ -74,8 +74,11 @@ proc critapp {dst} {
     }
     return $app
 }
-
-
+proc vfile {dir vfile} {
+    global me
+    set selfdir [file dirname $me]
+    eval [linsert $vfile 0 file join $selfdir lib $dir]
+}
 proc grep {file pattern} {
     set lines [split [read [set chan [open $file r]]] \n]
     close $chan
@@ -139,12 +142,9 @@ proc savedoc {tmpdir} {
     file copy -force [file join embedded www] [file join $tmpdir doc]
     return
 }
-
 proc pkgdirname {name version} {
 	return $name$version
 }
-
-
 proc placedoc {tmpdir} {
     file delete -force doc
     file copy -force [file join $tmpdir doc] doc
@@ -164,7 +164,6 @@ proc reminder {commit} {
 proc shquote value {
     return "\"[string map [list \\ \\\\ $ \\$ ` \\`] $value]\""
 }
-
 proc targets libdir {
     if {$libdir eq {} } {
 	set exe  [file dirname [file normalize [file join [info nameofexecutable] ...]]]
@@ -180,7 +179,15 @@ proc targets libdir {
     }
     list $dsta $dsti $dstl
 }
-
+proc query {q c} {
+    puts -nonewline "$q ? "
+    flush stdout
+    set a [string tolower [gets stdin]]
+    if {($a ne "y" ) && ($a ne "yes")} {
+	puts "$c"
+	exit 1
+    }
+}
 proc Hsynopsis {} { return "\n\tGenerate a synopsis of procs and builtin types" }
 proc _synopsis {} {
     puts Public:
@@ -305,14 +312,9 @@ proc _release {} {
     # Get scratchpad to assemble the release in.
     # Get version and hash of the commit to be released.
 
-    puts -nonewline "Have you run the tests ? "
-    flush stdout
-    set a [string tolower [gets stdin]]
-
-    if {($a ne "y" ) && ($a ne "yes")} {
-	puts "Please do"
-	exit 1
-    }
+    query "Have you run the tests"              "Please do"
+    query "Have you run the examples"           "Please do"
+    query "Have you bumped the version numbers" "Came back after doing so!"
 
     set tmpdir [tmpdir]
     id commit version
@@ -320,28 +322,28 @@ proc _release {} {
     savedoc $tmpdir
 
     # # ## ### ##### ######## #############
-    puts {Generate starkit...}
-    _starkit [file join $tmpdir critcl31.kit]
+    #puts {Generate starkit...}
+    #_starkit [file join $tmpdir critcl31.kit]
 
     # # ## ### ##### ######## #############
-    puts {Collecting starpack prefix...}
+    #puts {Collecting starpack prefix...}
     # which we use the existing starpack for, from the gh-pages branch
 
-    exec 2>@ stderr >@ stdout git checkout gh-pages
-    file copy [file join download critcl31.exe] [file join $tmpdir prefix.exe]
-    exec 2>@ stderr >@ stdout git checkout $commit
+    #exec 2>@ stderr >@ stdout git checkout gh-pages
+    #file copy [file join download critcl31.exe] [file join $tmpdir prefix.exe]
+    #exec 2>@ stderr >@ stdout git checkout $commit
 
     # # ## ### ##### ######## #############
-    puts {Generate starpack...}
-    _starpack [file join $tmpdir prefix.exe] [file join $tmpdir critcl31.exe]
+    #puts {Generate starpack...}
+    #_starpack [file join $tmpdir prefix.exe] [file join $tmpdir critcl31.exe]
     # TODO: vacuum the thing. fix permissions if so.
 
     # # ## ### ##### ######## #############
     2website
     placedoc $tmpdir
 
-    file copy -force [file join $tmpdir critcl31.kit] [file join downloadcritcl31.kit]
-    file copy -force [file join $tmpdir critcl31.exe] [file join download critcl31.exe]
+    #file copy -force [file join $tmpdir critcl31.kit] [file join download critcl31.kit]
+    #file copy -force [file join $tmpdir critcl31.exe] [file join download critcl31.exe]
 
     set index   [fileutil::cat index.html]
     set pattern   "\\\[commit .*\\\] \\(v\[^)\]*\\)<!-- current"
@@ -437,7 +439,7 @@ proc _install {args} {
 	    }
 
 	    if {$vfile ne {}} {
-		set version  [version [file join $selfdir lib $dir {*}$vfile]]
+		set version [version [vfile $dir $vfile]]
 	    } else {
 		set version {}
 	    }
@@ -487,7 +489,7 @@ proc _install {args} {
 	# Local MD5 hash implementation.
 
 	puts "\nInstalled C package:\tcritcl::md5c"
-	
+
 	# It is special because it is a critcl-based package, not pure
 	# Tcl as everything else of critcl. Its installation makes it
 	# the first package which will be compiled with critcl on this
@@ -527,7 +529,7 @@ proc _install {args} {
 	# the second package which will be compiled with critcl on this
 	# machine. It uses the just-installed application for
 	# that.
-	
+
 	set src     [file join $selfdir lib critcl-callback callback.tcl]
 	set version [version $src]
 	set name    critcl_callback
@@ -566,11 +568,11 @@ proc _install {args} {
     return
 }
 proc Huninstall {} { Hdrop }
-proc _uninstall {args} { _drop {*}$args }
+proc _uninstall {args} { eval [linsert $args 0 _drop] }
 
 proc Hdrop {} { return "?destination?\n\tRemove packages.\n\tdestination = path of package directory, default \[info library\]." }
 proc _drop {{dst {}}} {
-    global packages
+    global packages me
 
     if {[llength [info level 0]] < 2} {
 	set dstl [info library]
@@ -584,6 +586,8 @@ proc _drop {{dst {}}} {
     # Add the special package (see install). Not special with regard
     # to removal. Except for the name
     lappend packages [list critcl-md5c md5c.tcl critcl_md5c]
+
+    set selfdir [file dirname $me]
 
     foreach item $packages {
 	# Package: /name/
@@ -600,16 +604,16 @@ proc _drop {{dst {}}} {
 	}
 
 	if {$vfile ne {}} {
-	    set version  [version [file join [file dirname $::me] lib $dir $vfile]]
+	    set version [version [vfile $dir $vfile]]
 	} else {
 	    set version {}
 	}
 
+	set namevers [file join $dstl $name$version]
+
 	file delete -force $namevers
 	puts "Removed package:     $namevers"
     }
-
-    set namevers [file join $dstl $name$version]
 
     # Application: critcl
     set theapp [critapp $dsta]

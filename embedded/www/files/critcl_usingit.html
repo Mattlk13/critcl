@@ -99,10 +99,10 @@
    -->
 <body><hr> [
    <a href="../toc.html">Table Of Contents</a>
-| <a href="../index.html">Keyword Index</a>
+&#124; <a href="../index.html">Keyword Index</a>
  ] <hr>
 <div class="doctools">
-<h1 class="doctools_title">critcl_use(n) 3.1.17 doc &quot;C Runtime In Tcl (CriTcl)&quot;</h1>
+<h1 class="doctools_title">critcl_use(n) 3.1.18.1 doc &quot;C Runtime In Tcl (CriTcl)&quot;</h1>
 <div id="name" class="doctools_section"><h2><a name="name">Name</a></h2>
 <p>critcl_use - Using Critcl</p>
 </div>
@@ -367,9 +367,9 @@ information.</p>
     } critcl_pstring critcl_pstring
     critcl::argtypesupport pstring {
         typedef struct critcl_pstring {
-            Tcl_Obj* o;
-            char*    s;
-            int      len;
+            Tcl_Obj*    o;
+            const char* s;
+            int         len;
         } critcl_pstring;
     }
 </pre>
@@ -391,9 +391,9 @@ argument of <b class="cmd">critcl::cproc</b>.</p>
     } critcl_pstring* critcl_pstring*
     critcl::argtypesupport pstring {
         typedef struct critcl_pstring {
-            Tcl_Obj* o;
-            char*    s;
-            int      len;
+            Tcl_Obj*    o;
+            const char* s;
+            int         len;
         } critcl_pstring;
     }
     critcl::argtyperelease pstring {
@@ -402,10 +402,10 @@ argument of <b class="cmd">critcl::cproc</b>.</p>
 </pre>
 <p>Note, the above example shows only the most simple case of an
 allocated argument, with a conversion that cannot fail (namely, string
-retrieval). If the conversion can fail then either allocation has to
-be defered to happen only on successful conversion, or the conversion
-code has to release the allocated memory itself in the failure path,
-because it will never reach the code defined via
+retrieval). If the conversion can fail then either the allocation has
+to be defered to happen only on successful conversion, or the
+conversion code has to release the allocated memory itself in the
+failure path, because it will never reach the code defined via
 <b class="cmd">critcl::argtyperelease</b> in that case.</p>
 </div>
 <div id="subsection5" class="doctools_subsection"><h3><a name="subsection5">Custom Types, Results</a></h3>
@@ -587,11 +587,9 @@ As our example now an excerpt taken from real code, the top of the
         #include &quot;sha1.h&quot;
         #include &lt;stdlib.h&gt;
         #include &lt;assert.h&gt;
-        
         static
         Tcl_ObjType sha1_type; /* fast internal access representation */
-        
-        static void 
+        static void
         sha1_free_rep(Tcl_Obj* obj)
         {
             SHA1_CTX* mp = (SHA1_CTX*) obj-&gt;internalRep.otherValuePtr;
@@ -633,7 +631,7 @@ available to scripts we do not only have to make the relevant
 functions available as commands, often we also have to know all
 the various constants, flags, etc. these functions take.</p>
 <p>Rather than writing such magic numbers directly we would
-greatly prefer to use symbolic names instead. 
+greatly prefer to use symbolic names instead.
 Instead of providing one or more commands to list and map the magic
 numbers to strings critcl <em>only</em> provides a single command which
 allows the export of C defines and enumeration values, mapping them to
@@ -1459,7 +1457,7 @@ and/or the documentation are also very welcome and should be reported
 at <a href="https://github.com/andreas-kupries/critcl/issues">https://github.com/andreas-kupries/critcl/issues</a> as well.</p>
 </div>
 <div id="keywords" class="doctools_section"><h2><a name="keywords">Keywords</a></h2>
-<p><a href="../index.html#key8">C code</a>, <a href="../index.html#key3">Embedded C Code</a>, <a href="../index.html#key6">code generator</a>, <a href="../index.html#key0">compile &amp; run</a>, <a href="../index.html#key10">compiler</a>, <a href="../index.html#key1">dynamic code generation</a>, <a href="../index.html#key2">dynamic compilation</a>, <a href="../index.html#key9">generate package</a>, <a href="../index.html#key4">linker</a>, <a href="../index.html#key5">on demand compilation</a>, <a href="../index.html#key7">on-the-fly compilation</a></p>
+<p><a href="../index.html#c_code">C code</a>, <a href="../index.html#embedded_c_code">Embedded C Code</a>, <a href="../index.html#code_generator">code generator</a>, <a href="../index.html#compile_run">compile &amp; run</a>, <a href="../index.html#compiler">compiler</a>, <a href="../index.html#dynamic_code_generation">dynamic code generation</a>, <a href="../index.html#dynamic_compilation">dynamic compilation</a>, <a href="../index.html#generate_package">generate package</a>, <a href="../index.html#linker">linker</a>, <a href="../index.html#on_demand_compilation">on demand compilation</a>, <a href="../index.html#on_the_fly_compilation">on-the-fly compilation</a></p>
 </div>
 <div id="category" class="doctools_section"><h2><a name="category">Category</a></h2>
 <p>Glueing/Embedded C code</p>

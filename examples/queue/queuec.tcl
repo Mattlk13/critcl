@@ -5,7 +5,7 @@
 #       [x] Pure Tcl Implementation.
 #
 # Mainly demonstrates the utility package for the creation of classes
-# and objects in C, with both claaes and their instances represented
+# and objects in C, with both classes and their instances represented
 # as Tcl commands. In contrast to the stackc demo this does not use a
 # separate data structure package, nor separately written method
 # implementations.
@@ -14,8 +14,6 @@
 #
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
-#
-# RCS: @(#) $Id: queuec.tcl,v 1.1 2008/06/19 23:03:35 andreas_kupries Exp $
 
 package require Tcl 8.4
 package require critcl 3.1
@@ -52,7 +50,7 @@ critcl::class::define ::queuec {
 
     constructor {
 	if (objc > 0) {
-	    Tcl_AppendResult (interp, "wrong\#args for constructor, expected none", NULL);
+	    Tcl_AppendResult (interp, "wrong#args for constructor, expected none", NULL);
 	    goto error;
 	}
     }
@@ -64,7 +62,7 @@ critcl::class::define ::queuec {
 	List object holding unget'ted elements.
     } {
 	instance->unget  = Tcl_NewListObj (0,NULL);
-	Tcl_IncrRefCount (instance->unget); 
+	Tcl_IncrRefCount (instance->unget);
     } {
 	Tcl_DecrRefCount (instance->unget);
     }
@@ -74,7 +72,7 @@ critcl::class::define ::queuec {
 	List object holding the main queue.
     } {
 	instance->queue  = Tcl_NewListObj (0,NULL);
-	Tcl_IncrRefCount (instance->queue); 
+	Tcl_IncrRefCount (instance->queue);
     } {
 	Tcl_DecrRefCount (instance->queue);
     }
@@ -113,8 +111,8 @@ critcl::class::define ::queuec {
 	instance->queue  = Tcl_NewListObj (0,NULL);
 	instance->append = Tcl_NewListObj (0,NULL);
 
-	Tcl_IncrRefCount (instance->unget); 
-	Tcl_IncrRefCount (instance->queue); 
+	Tcl_IncrRefCount (instance->unget);
+	Tcl_IncrRefCount (instance->queue);
 	Tcl_IncrRefCount (instance->append);
     }
 
@@ -332,7 +330,7 @@ critcl::class::define ::queuec {
 		    QueueShift (instance);
 		    Tcl_ListObjGetElements (interp, instance->queue, &listc, &listv);
 		    for (j = instance->at;
-			 j < listc && i < n; 
+			 j < listc && i < n;
 			 j++, i++) {
 				    ASSERT_BOUNDS(i,n);
 				    ASSERT_BOUNDS(j,listc);
@@ -347,7 +345,7 @@ critcl::class::define ::queuec {
 			/* XX */
 			Tcl_ListObjGetElements (interp, instance->append, &listc, &listv);
 			for (j = 0;
-			     j < listc && i < n; 
+			     j < listc && i < n;
 			     j++, i++) {
 					ASSERT_BOUNDS(i,n);
 					ASSERT_BOUNDS(j,listc);
@@ -364,11 +362,11 @@ critcl::class::define ::queuec {
 		 */
 
 		if (i < n) {
-		    ASSERT(get,"Impossible 2nd return pull witohut get");
+		    ASSERT(get,"Impossible 2nd return pull without get");
 		    QueueShift (instance);
 		    Tcl_ListObjGetElements (interp, instance->queue, &listc, &listv);
 		    for (j = instance->at;
-			 j < listc && i < n; 
+			 j < listc && i < n;
 			 j++, i++) {
 			    ASSERT_BOUNDS(i,n);
 			    ASSERT_BOUNDS(j,listc);

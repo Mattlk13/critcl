@@ -7,7 +7,7 @@
 # class made easy, with code for object command and method dispatch
 # generated.
 
-package provide critcl::class 1.1
+package provide critcl::class 1.1.1
 
 # # ## ### ##### ######## ############# #####################
 ## Requirements.
@@ -64,11 +64,11 @@ proc ::critcl::class::define {classname script} {
     #       syntax
     #     >>
     #     typedef -> ^instancetype
-    #     menum   -> 
-    #     typekey -> 
+    #     menum   ->
+    #     typekey ->
     #     prefix  -> ''|'class_' (see *1*)
-    #     startn  -> 
-    #     starte  -> 
+    #     startn  ->
+    #     starte  ->
     #   >>
     #   (class)variable     -> dict <<
     #     names   -> list (string)
@@ -80,8 +80,8 @@ proc ::critcl::class::define {classname script} {
     #   >>
     #   stop         -> bool|presence
     #   includes     -> string (C code fragment)
-    #   include      -> 
-    #   instancetype -> 
+    #   include      ->
+    #   instancetype ->
     #   ivardecl     -> string (C code fragment)
     #   ivarrelease  -> string (C code fragment)
     #   ivarerror    -> string (C code fragment)
@@ -92,7 +92,7 @@ proc ::critcl::class::define {classname script} {
     #   (class_)method_enumeration
     #   (class_)method_dispatch
     #   (class_)method_implementations
-    # >> 
+    # >>
 
     catch { unset state }
 
@@ -107,7 +107,7 @@ proc ::critcl::class::define {classname script} {
     # Pull the package we are working on out of the system.
 
     set package [critcl::meta? name]
-    set qpackage [expr {[string match ::* $package] 
+    set qpackage [expr {[string match ::* $package]
 			? "$package"
 			: "::$package"}]
     lassign [uplevel 1 [list ::critcl::name2c $classname]] ns  cns  classname cclassname
@@ -174,6 +174,7 @@ proc ::critcl::class::ProcessFlags {} {
     }
 
     dict set state buildflags [join $flags {, }]
+    critcl::msg "\n\tClass flags:     $flags"
     return
 }
 
@@ -366,7 +367,7 @@ proc ::critcl::class::ProcessMethods {key} {
 	incr maxn 3
 
 	foreach name [lsort -dict [dict get $state $key names]] {
-	    set enum                    [dict get $state $key def $name enum]
+	    set enum   [string map $map [dict get $state $key def $name enum]]
 	    set case   [string map $map [dict get $state $key def $name case]]
 	    set code   [string map $map [dict get $state $key def $name code]]
 	    set syntax [string map $map [dict get $state $key def $name syntax]]
@@ -485,8 +486,20 @@ proc ::critcl::class::MakeMap {} {
 proc ::critcl::class::Template {path} {
     variable selfdir
     set path $selfdir/$path
-    #puts T=$path
-    return [critcl::util::Get $path]
+    critcl::msg "\tClass templates: $path"
+    return [Get $path]
+}
+
+proc ::critcl::class::Get {path} {
+    if {[catch {
+	set c [open $path r]
+	fconfigure $c -eofchar {}
+	set d [read $c]
+	close $c
+    }]} {
+	set d {}
+    }
+    return $d
 }
 
 proc ::critcl::class::Dedent {pfx text} {
@@ -511,6 +524,7 @@ proc ::critcl::class::CAPIPrefix {name} {
 }
 
 proc ::critcl::class::Flag {key flag} {
+    critcl::msg " ($key = $flag)"
     variable state
     dict set state $key $flag
     return
@@ -986,7 +1000,9 @@ proc ::critcl::class::spec::method {name op detail args} {
 
     ::critcl::at::caller
     ::critcl::at::incrt $detail
-    ::critcl::class::MethodExplicit $name $op [string trim $detail] {*}$args
+
+    eval [linsert $args 0 ::critcl::class::MethodExplicit $name $op [string trim $detail]]
+    #::critcl::class::MethodExplicit $name $op [string trim $detail] {*}$args
     return
 }
 
@@ -1065,7 +1081,8 @@ proc ::critcl::class::spec::classmethod {name op detail args} {
 
     ::critcl::at::caller
     ::critcl::at::incrt $detail
-    ::critcl::class::ClassMethodExplicit $name $op [string trim $detail] {*}$args
+    eval [linsert $args 0 ::critcl::class::ClassMethodExplicit $name $op [string trim $detail]]
+    # ::critcl::class::ClassMethodExplicit $name $op [string trim $detail] {*}$args
     return
 }
 

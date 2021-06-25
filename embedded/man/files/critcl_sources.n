@@ -4,7 +4,7 @@
 '\" Copyright (c) Steve Landers
 '\" Copyright (c) 2011-2018 Andreas Kupries
 '\"
-.TH "critcl_sources" n 3\&.1\&.17 doc "C Runtime In Tcl (CriTcl)"
+.TH "critcl_sources" n 3\&.1\&.18\&.1 doc "C Runtime In Tcl (CriTcl)"
 .\" The -*- nroff -*- definitions below are for supplemental macros used
 .\" in Tcl/Tk manual entries.
 .\"
@@ -296,7 +296,7 @@ For builders and developers we additionally provide
 respectively\&.
 .SH "SOURCE LOCATION"
 The official repository for Critcl can be found at
-\fIhttp://andreas-kupries\&.github\&.com/critcl\fR
+\fIhttp://andreas-kupries\&.github\&.io/critcl\fR
 .SH RETRIEVAL
 Assuming that you simply wish to look at the sources, or build a
 specific revision, the easiest way of retrieving it is to:
